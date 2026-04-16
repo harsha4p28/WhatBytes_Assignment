@@ -133,3 +133,11 @@ Create mapping:
 - Patients are scoped to the authenticated user who created them.
 - Doctor endpoints require authentication.
 - Mapping creation validates patient ownership and prevents duplicates.
+
+## Soft Delete Behavior
+
+- Patient, doctor, and mapping delete endpoints use soft delete instead of hard delete.
+- Deleted records are marked using `is_deleted=true` and `deleted_at=<timestamp>`.
+- List and detail endpoints only return active records (`is_deleted=false`).
+- Soft-deleted mapping records do not appear in mapping list responses.
+- Soft-deleted patient-doctor mappings can be recreated for the same patient and doctor.

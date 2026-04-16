@@ -25,16 +25,16 @@ class MappingSerializer(serializers.ModelSerializer):
         doctor_id = attrs['doctor_id']
 
         try:
-            patient = Patient.objects.get(id=patient_id, created_by=request.user)
+            patient = Patient.objects.get(id=patient_id, created_by=request.user, is_deleted=False)
         except Patient.DoesNotExist as exc:
             raise serializers.ValidationError({'patient_id': 'Patient not found or you do not have access to it.'}) from exc
 
         try:
-            doctor = Doctor.objects.get(id=doctor_id)
+            doctor = Doctor.objects.get(id=doctor_id, is_deleted=False)
         except Doctor.DoesNotExist as exc:
             raise serializers.ValidationError({'doctor_id': 'Doctor not found.'}) from exc
 
-        if PatientDoctorMapping.objects.filter(patient=patient, doctor=doctor).exists():
+        if PatientDoctorMapping.objects.filter(patient=patient, doctor=doctor, is_deleted=False).exists():
             raise serializers.ValidationError('This doctor is already assigned to the patient.')
 
         attrs['patient'] = patient

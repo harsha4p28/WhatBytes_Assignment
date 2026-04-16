@@ -59,4 +59,10 @@ class MappingAPITests(APITestCase):
 
 		delete_response = self.client.delete(reverse('mapping-detail-or-patient-doctors', args=[mapping.id]))
 		self.assertEqual(delete_response.status_code, status.HTTP_200_OK)
-		self.assertEqual(PatientDoctorMapping.objects.count(), 0)
+
+		mapping.refresh_from_db()
+		self.assertTrue(mapping.is_deleted)
+
+		list_response = self.client.get(reverse('mapping-list-create'))
+		self.assertEqual(list_response.status_code, status.HTTP_200_OK)
+		self.assertEqual(len(list_response.data), 0)

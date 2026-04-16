@@ -5,6 +5,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.test import APITestCase
 
 from accounts.models import User
+from .models import Doctor
 
 
 class DoctorAPITests(APITestCase):
@@ -30,3 +31,23 @@ class DoctorAPITests(APITestCase):
 		list_response = self.client.get(reverse('doctor-list-create'))
 		self.assertEqual(list_response.status_code, status.HTTP_200_OK)
 		self.assertEqual(len(list_response.data), 1)
+
+	def test_delete_doctor_uses_soft_delete(self):
+		doctor = Doctor.objects.create(
+			name='Dr. House',
+			specialization='Diagnostics',
+			phone_number='1111111111',
+			email='house@example.com',
+			years_of_experience=20,
+			created_by=self.user,
+		)
+
+		delete_response = self.client.delete(reverse('doctor-detail', args=[doctor.id]))
+		self.assertEqual(delete_response.status_code, status.HTTP_204_NO_CONTENT)
+
+		doctor.refresh_from_db()
+		self.assertTrue(doctor.is_deleted)
+
+		list_response = self.client.get(reverse('doctor-list-create'))
+		self.assertEqual(list_response.status_code, status.HTTP_200_OK)
+		self.assertEqual(len(list_response.data), 0)

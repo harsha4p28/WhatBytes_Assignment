@@ -47,3 +47,14 @@ class PatientAPITests(APITestCase):
 		self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {RefreshToken.for_user(self.other_user).access_token}')
 		detail_response = self.client.get(reverse('patient-detail', args=[self.patient.id]))
 		self.assertEqual(detail_response.status_code, status.HTTP_404_NOT_FOUND)
+
+	def test_delete_patient_uses_soft_delete(self):
+		delete_response = self.client.delete(reverse('patient-detail', args=[self.patient.id]))
+		self.assertEqual(delete_response.status_code, status.HTTP_204_NO_CONTENT)
+
+		self.patient.refresh_from_db()
+		self.assertTrue(self.patient.is_deleted)
+
+		list_response = self.client.get(reverse('patient-list-create'))
+		self.assertEqual(list_response.status_code, status.HTTP_200_OK)
+		self.assertEqual(len(list_response.data), 0)

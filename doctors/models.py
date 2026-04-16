@@ -9,6 +9,8 @@ class Doctor(models.Model):
 	email = models.EmailField(blank=True)
 	years_of_experience = models.PositiveIntegerField(default=0)
 	created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='doctors')
+	is_deleted = models.BooleanField(default=False)
+	deleted_at = models.DateTimeField(null=True, blank=True)
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
 
