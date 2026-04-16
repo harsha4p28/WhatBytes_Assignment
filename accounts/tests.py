@@ -1,3 +1,34 @@
-from django.test import TestCase
+from django.urls import reverse
 
-# Create your tests here.
+from rest_framework import status
+from rest_framework.test import APITestCase
+
+
+class AuthAPITests(APITestCase):
+	def test_register_and_login_user(self):
+		register_response = self.client.post(
+			reverse('register'),
+			{
+				'name': 'Alice Smith',
+				'email': 'alice@example.com',
+				'password': 'StrongPass123',
+			},
+			format='json',
+		)
+
+		self.assertEqual(register_response.status_code, status.HTTP_201_CREATED)
+		self.assertEqual(register_response.data['user']['email'], 'alice@example.com')
+
+		login_response = self.client.post(
+			reverse('login'),
+			{
+				'email': 'alice@example.com',
+				'password': 'StrongPass123',
+			},
+			format='json',
+		)
+
+		self.assertEqual(login_response.status_code, status.HTTP_200_OK)
+		self.assertIn('access', login_response.data)
+		self.assertIn('refresh', login_response.data)
+		self.assertEqual(login_response.data['user']['email'], 'alice@example.com')
